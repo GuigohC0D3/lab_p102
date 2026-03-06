@@ -44,16 +44,13 @@ def softmax(x):
     exp_x = np.exp(x_shifted)
     return exp_x / np.sum(exp_x, axis=-1, keepdims=True)
 
-
 def layer_norm(x, epsilon=1e-6):
     media = np.mean(x, axis=-1, keepdims=True)
     variancia = np.var(x, axis=-1, keepdims=True)
     return (x - media) / np.sqrt(variancia + epsilon)
 
-
 def relu(x):
     return np.maximum(0, x)
-
 
 def self_attention(X):
     batch_size, sequence_length, d_model = X.shape
@@ -76,7 +73,6 @@ def self_attention(X):
 
     return attention_output, attention_weights
 
-
 def feed_forward(X, d_ff=256):
     batch_size, sequence_length, d_model = X.shape
 
@@ -92,3 +88,27 @@ def feed_forward(X, d_ff=256):
     output = hidden_relu @ W2 + b2
     return output
 
+N = 6
+
+for camada in range(N):
+    print(f"CAMADA {camada + 1}")
+
+    X_att, attention_weights = self_attention(X)
+    print("Shape de X_att:", X_att.shape)
+    print("Shape de attention_weights:", attention_weights.shape)
+
+    X_norm1 = layer_norm(X + X_att)
+    print("Shape de X_norm1:", X_norm1.shape)
+
+    X_ffn = feed_forward(X_norm1, d_ff=256)
+    print("Shape de X_ffn:", X_ffn.shape)
+
+    X_out = layer_norm(X_norm1 + X_ffn)
+    print("Shape de X_out:", X_out.shape)
+    print()
+
+    X = X_out
+
+print("Shape final de X:", X.shape)
+print("Vetor Z final:")
+print(X)
